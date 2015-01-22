@@ -1,0 +1,21 @@
+{
+  "name": "get-dependencies",
+  "version": "1.0.0",
+  "description": "",
+  "main": "getDependencies.js",
+  "scripts": {
+    "prepublish": "make prepublish"
+  },
+  "bin": {
+    "get-dependencies": "bin/get-dependencies.js"
+  },
+  "keywords": [],
+  "author": "Tim Oxley <secoif@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "yargs": "^1.3.3"
+  },
+  "devDependencies": {
+    "6to5": "^2.13.5"
+  }
+}
