@@ -1,7 +1,7 @@
 {
   "name": "installed",
   "version": "1.0.0",
-  "description": "",
+  "description": "Command-line tool for selectively displaying data about installed packages.",
   "main": "installed.js",
   "scripts": {
     "prepublish": "make prepublish",
@@ -34,5 +34,13 @@
   "devDependencies": {
     "6to5": "^2.13.5",
     "tape": "^3.4.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/timoxley/installed.git"
+  },
+  "bugs": {
+    "url": "https://github.com/timoxley/installed/issues"
+  },
+  "homepage": "https://github.com/timoxley/installed"
 }
