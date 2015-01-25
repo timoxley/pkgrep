@@ -12,7 +12,7 @@
   },
   "keywords": [],
   "author": "Tim Oxley <secoif@gmail.com>",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "columnify": "^1.3.2",
     "component-props": "^1.1.1",
