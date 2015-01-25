@@ -1,6 +1,6 @@
 {
   "name": "installed",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Command-line tool for selectively displaying data about installed packages.",
   "main": "installed.js",
   "scripts": {
