@@ -1,6 +1,6 @@
 ## installed
 
-Command-line tool for selectively displaying data about installed packages.
+Command-line tool for selectively displaying data about packages in node_modules.
 
 ## Installation
 
