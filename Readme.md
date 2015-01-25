@@ -65,7 +65,7 @@ mkdirp@0.5.0
 2 matching dependencies
 ```
 
-## Traverse the node_modules hierarchy.
+### Traverse the node_modules hierarchy.
 
 You can use `--depth` in combination with most other flags.
 
@@ -78,7 +78,7 @@ minimist@0.0.8
 3 matching dependencies
 ```
 
-## Check Whether a Package is Installed
+### Check Whether a Package is Installed
 
 If the package is not installed you'll get a non-zero exit-code:
 
@@ -102,7 +102,7 @@ inherits@2.0.1
 1 matching dependency
 ```
 
-## Check whether multiple packages are installed
+### Check whether multiple packages are installed
 
 ```
 > installed mkdirp inherits bower || echo "Failed."
@@ -111,7 +111,7 @@ mkdirp@0.5.0
 2 matching dependencies.
 ```
 
-## Ensure Packages are Installed
+### Ensure Packages are Installed
 
 `--all` will exit with failure unless all listed packages are matched.
 
@@ -135,7 +135,7 @@ mkdirp@0.5.0
 Failed.
 ```
 
-## Include devDependencies
+### Include devDependencies
 
 Use `--dev` to include devDependencies.
 
@@ -150,7 +150,7 @@ tape@3.4.0
 1 matching dependency
 ```
 
-## Custom Output Data and Formats
+### Custom Output Data and Formats
 
 Use `--format` to control output. Variables are enclosed in single
 curlies.
@@ -166,7 +166,7 @@ mkdirp@0.5.0 - /Users/timoxley/Projects/test/installed-cli-test/node_modules/mkd
 2 dependencies.
 ```
 
-## Print Nested Properties
+### Print Nested Properties
 
 ```
 > installed --format='{name} "{scripts.test}"'
@@ -175,7 +175,7 @@ mkdirp "tap test/*.js"
 2 dependencies.
 ```
 
-## List Available Format Variables
+### List Available Format Variables
 
 ```
 > installed --list-vars
@@ -205,7 +205,7 @@ peerDependencies      [object Object]
 root                  true
 ```
 
-## Table Output
+### Table Output
 
 Formatting courtesy of [columnify](https://github.com/timoxley/columnify).
 
@@ -230,7 +230,7 @@ through        2.3.6
 ```
 
 
-## Control Table Columns
+### Control Table Columns
 
 To make it easy to flip between text and table output, all whitespace &
 non-variable characters in the `--format` string are totally ignored.
@@ -244,7 +244,7 @@ mkdirp   0.5.0   /Users/timoxley/Projects/get-dependencies/installed-cli-test/no
 2 dependencies.
 ```
 
-## JSON Output
+### JSON Output
 
 Use `--json` to get JSON Output.
 
@@ -267,7 +267,7 @@ Use `--json` to get JSON Output.
 2 dependencies.
 ```
 
-## Flatten JSON Output
+### Flatten JSON Output
 
 Use `--flatten` with `--json` to remove JSON object nesting.
 
@@ -286,7 +286,7 @@ Use `--flatten` with `--json` to remove JSON object nesting.
 2 dependencies.
 ```
 
-## Filter Output with Simple Expressions
+### Filter Output with Simple Expressions
 
 `installed` uses [to-function](https://www.npmjs.com/package/to-function) to parse simple filter expressions.
 
@@ -299,6 +299,12 @@ inherits 2.0.1   /Users/timoxley/Projects/get-dependencies/installed-cli-test/no
 mkdirp   0.5.0   /Users/timoxley/Projects/get-dependencies/installed-cli-test/node_modules/mkdirp
 2 dependencies.
 ```
+
+## TODO
+
+* Find tool with more flexible, less fragile filtering syntax, without sacrificing too much readability.
+* Gather more usecases.
+* Integration tests.
 
 ## License
 
