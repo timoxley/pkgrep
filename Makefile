@@ -1,6 +1,9 @@
 BIN := $(PWD)/bin/installed.js
 RUN := node $(BIN)
 
+test: build
+	# just a sanity check for now
+	@ $(RUN)
 
 prepublish: build
 
