@@ -95,7 +95,10 @@ function getDependencies(mod, result, visited, depth) {
   var dependencies = mod.dependencies || [];
   Object.keys(dependencies).forEach(function (name) {
     var dep = mod.dependencies[name];
-    if (dep === mod) return;
+    if (dep === mod) {
+      delete mod.dependencies[name];
+      return;
+    }
     if (typeof dep === "string") return;
     if (visited[dep.realPath]) return;
     visited[dep.realPath] = true;
