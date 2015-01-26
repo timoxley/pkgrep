@@ -12,7 +12,21 @@
     "pkggrep": "bin/pkgrep.js",
     "pkg-grep": "bin/pkgrep.js"
   },
-  "keywords": [],
+  "keywords": [
+    "npm",
+    "node_modules",
+    "grep",
+    "package",
+    "find",
+    "dependencies",
+    "require",
+    "install",
+    "pkg",
+    "package.json",
+    "package",
+    "packages",
+    "read-installed"
+  ],
   "author": "Tim Oxley <secoif@gmail.com>",
   "license": "MIT",
   "dependencies": {

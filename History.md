@@ -1,4 +1,11 @@
 
+1.0.5 / 2015-01-27
+==================
+
+  * Rename installed -> pkgrep.
+  * Use ES6 expressions for filtering.
+  * Reorder yargs options for better --help output.
+
 1.0.4 / 2015-01-26
 ==================
 
