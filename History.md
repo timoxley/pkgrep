@@ -1,5 +1,10 @@
 
-1.0.5 / 2015-01-27
+1.1.1 / 2015-01-27
+==================
+
+  * Move primary logic into timoxley/installed package.
+
+1.1.0 / 2015-01-27
 ==================
 
   * Rename installed -> pkgrep.

@@ -1,6 +1,6 @@
 {
   "name": "pkgrep",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Powerful CLI tool to find, filter & format package data in node_modules.",
   "main": "pkgrep.js",
   "scripts": {
