@@ -1,53 +1,55 @@
-## installed
+## pkgrep
 
-Command-line tool for selectively displaying data about packages in node_modules.
+Powerful CLI tool to find, filter & format package data in node_modules.
 
 ## Installation
 
 ```
-> npm install -g installed
+> npm install -g pkgrep
 ```
 
 ## Usage
 
 ```
-> installed  --help
-Display data about installed packages.
+Find, filter & format package data in node_modules.
 
-Usage: installed [options] [name[@version] ...]
+Usage: pkgrep [options] [name[@version] ...]
 
 Examples:
-  installed                                                            List all top-level dependencies
-  installed inherits mkdirp                                            Check whether either mkdirp or inherits are installed. Only fails if none can be found.
-  installed --all inherits mkdirp                                      Check whether both mkdirp and inherits are installed. Fails all dependencies are found.
-  installed --depth=-1 mkdirp                                          Check whether mkdirp is installed at any depth.
-  installed --dev mkdirp                                               Check for mkdirp as a dependency OR a devDependency. devDependencies are filtered-out by default.
-  installed mkdirp@^1.0.0                                              Check whether mkdirp version matching ^1.0.0 is installed.
-  installed --format="{name}" mkdirp inherits                          Only print names of matching installed dependencies at the top level.
-  installed --format="{version} - {realPath}" mkdirp                   Print the version followed by a hyphen and the realpath to mkdirp.
-  installed --table --format="{name} {license} {path}"                 Format top level dependency name, license and path as a table.
-  installed --depth=-1 --unique --format="{name}@{version}"            List all dependencies, but only display unique name@version instances.
-  installed --filter="scripts.test"                                    List only dependencies with a test script.
-  installed --filter="dependencies.browserify"                         List only dependencies that depend on browserify.
-  installed --filter="browserify.transform.indexOf('es6ify') == -1"    List only dependencies with es6ify as a browserify transform.
-  installed --filter="dependencies.browserify" --dev                   List only dependencies that depend on browserify.
+  pkgrep                                                       List all top-level dependencies
+  pkgrep inherits mkdirp                                       Check whether either mkdirp or inherits are installed. Only fails if none can be found.
+  pkgrep --all inherits mkdirp                                 Check whether both mkdirp and inherits are installed. Fails all dependencies are found.
+  pkgrep --depth=-1 mkdirp                                     Check whether mkdirp is installed at any depth.
+  pkgrep --dev mkdirp                                          Check for mkdirp as a dependency OR a devDependency. devDependencies are filtered-out by default.
+  pkgrep mkdirp@^1.0.0                                         Check whether mkdirp version matching ^1.0.0 is installed.
+  pkgrep --format="{name}" mkdirp inherits                     Only print names of matching installed dependencies at the top level.
+  pkgrep --format="{version} - {realPath}" mkdirp              Print the version followed by a hyphen and the realpath to mkdirp.
+  pkgrep --table --format="{name} {license} {path}"            Format top level dependency name, license and path as a table.
+  pkgrep --depth=-1 --unique --format="{name}@{version}"       List all dependencies, but only display unique name@version instances.
+  pkgrep --filter="scripts.test"                               List only dependencies with a test script.
+  pkgrep --filter="dependencies.browserify"                    List only dependencies that depend on browserify.
+  pkgrep --filter="browserify.transform.includes('es6ify')"    List only dependencies with es6ify as a browserify transform (Note: ES6 prototype features are shimmed).
+  pkgrep --filter="dependencies.browserify" --dev              List only dependencies that depend on browserify.
 
 
 Options:
+  -a, --all        Match all dependencies. non-zero exit if not all match.
+  -d, --depth      Traversal depth. use --depth=Infinity or --depth=-1 to traverse entire dependency tree.            [default: 0]
+  -f, --format     Output format string. Place variables in {curlies}.                                                [default: "{name}@{version}"]
+  -t, --table      Show output in a table. Use --format to indicate desired columns. All non-variables are ignored.
+  -s, --strict     Only list packages which contain all variables in --format.
+  -x, --filter     Filter packages using an arbitrary ES6 expression. No return statement required. Use at own risk.
   --dev            Include development dependencies.
-  --extraneous     Show extraneous dependencies                                                                      [default: true]
+  --extraneous     Show extraneous dependencies                                                                       [default: true]
   --no-extraneous  Filter extraneous dependencies. This will include --dev dependencies if --dev is not enabled.
-  --summary        Show summary after results on stderr.                                                             [default: true]
-  --no-summary     Do not print any summary text to stderr. "e.g. 5 matching dependencies."
-  --depth          Traversal depth. use --depth=Infinity or --depth=-1 to traverse entire dependency tree.           [default: 0]
-  --format         Output format string. Place variables in {curlies}.                                               [default: "{name}@{version}"]
-  --list-vars      List examples of possible --format & --table variables.
-  --table          Show output in a table. Use --format to indicate desired columns. All non-variables are ignored.
-  --unique         Only display unique lines of output.                                                              [default: true]
-  --no-unique      Permit duplicate lines of output.
-  --filter         Filter packages by an expression. See http://npm.im/to-function for syntax.                       [string]  [default: function filter() { [native code] }]
-  --json           Generate JSON output. Respects keys used in --format. All non-variables are ignored.
   --flatten        Flatten --json output so there is no object nesting.
+  --json           Generate JSON output. Respects keys used in --format. All non-variables are ignored.
+  --list-vars      List examples of possible --format & --table variables.
+  --summary        Show summary after results on stderr.                                                              [default: true]
+  --no-summary     Do not print any summary text to stderr. "e.g. 5 matching dependencies."
+  --silent         No visual output, exit codes only.
+  --unique         Only display unique lines of output.                                                               [default: true]
+  --no-unique      Do not remove duplicate lines of output.
   --help           Show help
   --version        Show version number
 ```
@@ -55,11 +57,12 @@ Options:
 ## Examples
 
 ### List all top-level dependencies
+
 ```
-> mkdir installed-cli-test && cd installed-cli-test
+> mkdir pkgrep-cli-test && cd pkgrep-cli-test
 > npm init -f
 > npm install inherits mkdirp --save
-> installed
+> pkgrep
 inherits@2.0.1
 mkdirp@0.5.0
 2 matching dependencies
@@ -71,7 +74,7 @@ You can use `--depth` in combination with most other flags.
 
 ```
 > npm install --save mkdirp
-> installed --depth=-1
+> pkgrep --depth=-1
 inherits@2.0.1
 mkdirp@0.5.0
 minimist@0.0.8
@@ -83,21 +86,21 @@ minimist@0.0.8
 If the package is not installed you'll get a non-zero exit-code:
 
 ```
-> installed mkdirp || echo "package is not installed"
+> pkgrep mkdirp || echo "package is not installed"
 mkdirp@0.5.0
 1 matching dependency
 
-> installed bower || echo "package is not installed"
+> pkgrep bower || echo "package is not installed"
 No matching dependencies!
 package is not installed
 ```
 
 You can pass any valid semver version in the format: name@semver:
 ```
-> installed inherits@2.0.0
+> pkgrep inherits@2.0.0
 No matching dependencies!
 
-> installed inherits@~2.0.0
+> pkgrep inherits@~2.0.0
 inherits@2.0.1
 1 matching dependency
 ```
@@ -105,7 +108,7 @@ inherits@2.0.1
 ### Check whether multiple packages are installed
 
 ```
-> installed mkdirp inherits bower || echo "Failed."
+> pkgrep mkdirp inherits bower || echo "Failed."
 inherits@2.0.1
 mkdirp@0.5.0
 2 matching dependencies.
@@ -116,7 +119,7 @@ mkdirp@0.5.0
 `--all` will exit with failure unless all listed packages are matched.
 
 ```
-> installed --all mkdirp inherits bower || echo "Failed."
+> pkgrep --all mkdirp inherits bower || echo "Failed."
 inherits@2.0.1
 mkdirp@0.5.0
 2 matching dependencies.
@@ -127,7 +130,7 @@ Failed.
 `--all` will exit with failure unless all packages are matched.
 
 ```
-> installed --all mkdirp inherits bower || echo "Failed."
+> pkgrep --all mkdirp inherits bower || echo "Failed."
 inherits@2.0.1
 mkdirp@0.5.0
 2 matching dependencies.
@@ -141,11 +144,11 @@ Use `--dev` to include devDependencies.
 
 ```
 > npm install --save-dev tape
-> installed tape
+> pkgrep tape
 
 No matching dependencies!
 
-> installed tape --dev
+> pkgrep tape --dev
 tape@3.4.0
 1 matching dependency
 ```
@@ -156,20 +159,20 @@ Use `--format` to control output. Variables are enclosed in single
 curlies.
 
 ```
-> installed --format="{name}"
+> pkgrep --format="{name}"
 inherits
 mkdirp
 2 dependencies.
-> installed --format="{name}@{version} - {realPath}"
-inherits@2.0.1 - /Users/timoxley/Projects/test/installed-cli-test/node_modules/inherits
-mkdirp@0.5.0 - /Users/timoxley/Projects/test/installed-cli-test/node_modules/mkdirp
+> pkgrep --format="{name}@{version} - {realPath}"
+inherits@2.0.1 - /Users/timoxley/Projects/test/pkgrep-cli-test/node_modules/inherits
+mkdirp@0.5.0 - /Users/timoxley/Projects/test/pkgrep-cli-test/node_modules/mkdirp
 2 dependencies.
 ```
 
 ### Print Nested Properties
 
 ```
-> installed --format='{name} "{scripts.test}"'
+> pkgrep --format='{name} "{scripts.test}"'
 inherits "node test"
 mkdirp "tap test/*.js"
 2 dependencies.
@@ -178,10 +181,10 @@ mkdirp "tap test/*.js"
 ### List Available Format Variables
 
 ```
-> installed --list-vars
+> pkgrep --list-vars
 Possible format keys:
 KEY                   VALUE
-name                  installed-cli-test
+name                  pkgrep-cli-test
 version               1.0.0
 description
 main                  index.js
@@ -194,11 +197,11 @@ dependencies.inherits ^2.0.1
 dependencies.mkdirp   ^0.5.0
 devDependencies.tape  ^3.4.0
 readme                ERROR: No README data found!
-_id                   installed-cli-test@1.0.0
-realName              installed-cli-test
+_id                   pkgrep-cli-test@1.0.0
+realName              pkgrep-cli-test
 extraneous            false
-path                  /Users/timoxley/test/installed-clie-test
-realPath              /Users/timoxley/test/installed-clie-test
+path                  /Users/timoxley/test/pkgrep-cli-test
+realPath              /Users/timoxley/test/pkgrep-cli-test
 link
 depth                 0
 peerDependencies      [object Object]
@@ -210,9 +213,9 @@ root                  true
 Formatting courtesy of [columnify](https://github.com/timoxley/columnify).
 
 ```
-> installed --table
+> pkgrep --table
 
-installed --table --depth=-1
+pkgrep --table --depth=-1
 NAME           VERSION
 inherits       2.0.1
 mkdirp         0.5.0
@@ -237,10 +240,10 @@ non-variable characters in the `--format` string are totally ignored.
 The variables are collected and used as table columns.
 
 ```
-> installed --format="{name}@{version} - {realPath}" --table
+> pkgrep --format="{name}@{version} - {realPath}" --table
 NAME     VERSION REALPATH
-inherits 2.0.1   /Users/timoxley/Projects/get-dependencies/installed-cli-test/node_modules/inherits
-mkdirp   0.5.0   /Users/timoxley/Projects/get-dependencies/installed-cli-test/node_modules/mkdirp
+inherits 2.0.1   /Users/timoxley/Projects/get-dependencies/pkgrep-cli-test/node_modules/inherits
+mkdirp   0.5.0   /Users/timoxley/Projects/get-dependencies/pkgrep-cli-test/node_modules/mkdirp
 2 dependencies.
 ```
 
@@ -249,7 +252,7 @@ mkdirp   0.5.0   /Users/timoxley/Projects/get-dependencies/installed-cli-test/no
 Use `--json` to get JSON Output.
 
 ```
-> installed --format="{name} {scripts.test}" --json
+> pkgrep --format="{name} {scripts.test}" --json
 [
   {
     "name": "inherits",
@@ -272,7 +275,7 @@ Use `--json` to get JSON Output.
 Use `--flatten` with `--json` to remove JSON object nesting.
 
 ```
-> installed --format="{name} {scripts.test}" --json --flatten
+> pkgrep --format="{name} {scripts.test}" --json --flatten
 [
   {
     "name": "inherits",
@@ -286,23 +289,27 @@ Use `--flatten` with `--json` to remove JSON object nesting.
 2 dependencies.
 ```
 
-### Filter Output with Simple Expressions
+### Filtering Packages
 
-`installed` uses [to-function](https://www.npmjs.com/package/to-function) to parse simple filter expressions.
+`pkgrep` permits using arbitrary ES6 expressions. Use at own risk.
 
-For example, we can list only dependencies that depend on tap in their devDependencies:
+All package properties are in scope as if the code was executed within a
+`with` statement. No return statement is required for single-line
+expressions.
+
+For example, we can list only dependencies that depend on `tap` in their
+devDependencies:
 
 ```
-> installed --filter="devDependencies.tap" --depth=-1
+> pkgrep --filter="devDependencies.tap" --depth=-1
 NAME     VERSION REALPATH
-inherits 2.0.1   /Users/timoxley/Projects/get-dependencies/installed-cli-test/node_modules/inherits
-mkdirp   0.5.0   /Users/timoxley/Projects/get-dependencies/installed-cli-test/node_modules/mkdirp
+inherits 2.0.1   /Users/timoxley/Projects/get-dependencies/pkgrep-cli-test/node_modules/inherits
+mkdirp   0.5.0   /Users/timoxley/Projects/get-dependencies/pkgrep-cli-test/node_modules/mkdirp
 2 dependencies.
 ```
 
 ## TODO
 
-* Find tool with more flexible, less fragile filtering syntax, without sacrificing too much readability.
 * Gather more usecases.
 * Integration tests.
 

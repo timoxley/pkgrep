@@ -1,14 +1,16 @@
 {
-  "name": "installed",
+  "name": "pkgrep",
   "version": "1.1.0",
-  "description": "Command-line tool for selectively displaying data about installed packages.",
-  "main": "installed.js",
+  "description": "Powerful CLI tool to find, filter & format package data in node_modules.",
+  "main": "pkgrep.js",
   "scripts": {
     "prepublish": "make prepublish",
     "test": "make test"
   },
   "bin": {
-    "installed": "bin/installed.js"
+    "pkgrep": "bin/pkgrep.js",
+    "pkggrep": "bin/pkgrep.js",
+    "pkg-grep": "bin/pkgrep.js"
   },
   "keywords": [],
   "author": "Tim Oxley <secoif@gmail.com>",

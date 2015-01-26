@@ -1,4 +1,4 @@
-BIN := $(PWD)/bin/installed.js
+BIN := $(PWD)/bin/pkgrep.js
 RUN := node $(BIN)
 
 test: build
@@ -24,12 +24,12 @@ test: build
 
 prepublish: build
 
-build: installed.js bin/installed.js
+build: pkgrep.js bin/pkgrep.js
 
-installed.js: index.js
-	6to5 index.js > installed.js
+pkgrep.js: index.js
+	6to5 index.js > pkgrep.js
 
-bin/installed.js: bin/index.js
-	6to5 bin/index.js > bin/installed.js
+bin/pkgrep.js: bin/index.js
+	6to5 bin/index.js > bin/pkgrep.js
 
 .PHONY: test prepublish build
