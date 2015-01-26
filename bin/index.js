@@ -2,7 +2,7 @@
 
 "use strict"
 
-var argv = require('yargs')
+const cli = require('yargs')
 .usage('Display data about installed packages.\n\nUsage: $0 [options] [name[@version] ...]')
 .boolean('dev')
 .describe('dev', 'Include development dependencies.')
@@ -16,6 +16,7 @@ var argv = require('yargs')
 .describe('no-summary', 'Do not print any summary text to stderr. "e.g. 5 matching dependencies."')
 .describe('depth', 'Traversal depth. use --depth=Infinity or --depth=-1 to traverse entire dependency tree.')
 .default('depth', 0)
+.alias('d', 'depth')
 .boolean('all')
 .alias('a', 'all')
 .describe('all', 'Match all dependencies. non-zero exit if not all match.')
@@ -62,51 +63,57 @@ var argv = require('yargs')
 .example('$0 --filter="dependencies.browserify" --dev', 'List only dependencies that depend on browserify.')
 .help('help')
 .version(require('../package.json').version, 'version')
-.argv
 
-var matchInstalled = require('../')
+const argv = cli.argv
 
-var template = require('hogan')
-var columnify = require('columnify')
-var split = require('split-object')
-var flat = require('flat')
-var toFunction = require('to-function')
-var stringToRegexp = require('string-to-regexp')
-var stringify = require('json-stringify-safe')
-var he = require('he')
+const matchInstalled = require('../')
 
-var dirname = process.cwd()
-var toMatch = argv._
-var hasError = 0
+const template = require('hogan')
+const columnify = require('columnify')
+const split = require('split-object')
+const flat = require('flat')
+const toFunction = require('to-function')
+const stringToRegexp = require('string-to-regexp')
+const stringify = require('json-stringify-safe')
+const he = require('he')
 
-if (argv.depth === 'Infinity') argv.depth = Infinity
-if (argv.depth === -1) argv.depth = Infinity
+const dirname = process.cwd()
+const toMatch = argv._
+
+let exitCode = 0
+
+// Note I've used the square bracket syntax for all argv accesses so
+// that it's easier to see where the args are used.
+
+if (argv['depth'] === 'Infinity') argv['depth'] = Infinity
+if (argv['depth'] === -1) argv['depth'] = Infinity
 
 if (argv['list-vars']) {
-  logError('Possible format keys:')
+  logStdErr('Possible format keys:')
   possibleFormatKeys(dirname)
   return
 }
 
-function inspect(item) { // for debugging
-  console.log(require('util').inspect(item, {colors: true, depth: 30}))
+argv.columns = {
+  truncate: true,
+  maxLineWidth: 'auto'
 }
-
-
 
 matchInstalled(dirname, toMatch, argv, function(err, pkgs, matched) {
   if (err) throw err
+  enableObjectKeysOnToString()
   matched = matched || []
   pkgs = pkgs || []
-  if (argv.strict && argv.format) {
-    pkgs = filterByFormat(pkgs, argv.format)
+  if (argv['strict'] && argv['format']) {
+    pkgs = filterByFormat(pkgs, argv['format'])
   }
-  if (argv.filter) {
-    if (argv.filter[0] === '/') {
-      argv.filter = stringToRegexp(argv.filter)
+  if (argv['filter']) {
+    if (argv['filter'][0] === '/') {
+      argv['filter'] = stringToRegexp(argv['filter'])
     }
-    var filter = toFunction(argv.filter)
-    pkgs = pkgs.filter(function(pkg) {
+
+    let filter = toFunction(argv['filter'])
+    pkgs = pkgs.filter(pkg => {
       try {
         return filter(pkg)
       } catch (e) {
@@ -115,53 +122,49 @@ matchInstalled(dirname, toMatch, argv, function(err, pkgs, matched) {
     })
   }
 
-  var resultTotal = pkgs.length
+  let resultTotal = pkgs.length
 
-  if (argv.json) {
-    if (argv.format) {
-      var outData = formatObject(pkgs, argv.format)
-      if (!argv.flatten) {
-        outData = outData.map(function(data) {
-          return flat.unflatten(data, { safe: true, object: true})
-        })
+  if (argv['json']) {
+    if (argv['format']) {
+      let outData = formatObject(pkgs, argv['format'])
+
+      if (!argv['flatten']) {
+        outData = outData.map(data => flat.unflatten(data, {safe: true, object: true}))
       }
-      if (argv.table) {
-        outData = split(outData)
-      }
+
+      if (argv['table']) outData = split(outData)
+
       log(stringify(outData, null, 2))
+
     } else {
-      var outData = pkgs
-      if (argv.flatten) outData = flat(outData)
+      let outData = pkgs
+      if (argv['flatten']) outData = flat(outData)
       log(stringify(outData, null, 2))
     }
   } else {
-    var outputText = argv.table
+    let outputText = argv['table']
     ? renderTable(pkgs, argv)
     : renderText(pkgs, argv)
     outputText = outputText
 
-    var lines = outputText.split('\n')
+    let lines = outputText.split('\n')
     // remove empty lines
-    lines = lines.map(function(line) {
-      return line.trim()
-    }).filter(Boolean)
+    lines = lines.map(l => l.trim()).filter(Boolean)
 
-    if (argv.unique) {
-      var uniqueLines = lines.filter(function(line, index, arr) {
-        return arr.lastIndexOf(line) === index
-      })
+    if (argv['unique']) {
+      let uniqueLines = lines.filter((line, index, arr) => arr.lastIndexOf(line) === index)
       resultTotal = resultTotal - (lines.length - uniqueLines.length)
       lines = uniqueLines
     }
     log(lines.join('\n'))
   }
 
-  var matchingWord = argv._.length ? 'matching ' : ''
+  let matchingWord = argv._.length ? 'matching ' : ''
 
   switch (resultTotal)  {
     case 0:
       summary('No %sdependencies!', matchingWord)
-      hasError = 1
+      exitCode = 1
       break
     case 1:
       summary('%d %sdependency', resultTotal, matchingWord)
@@ -173,56 +176,60 @@ matchInstalled(dirname, toMatch, argv, function(err, pkgs, matched) {
 
   if (argv['all']) {
     summary('%d out of %d matches.', matched.length, toMatch.length)
-    if (toMatch.length !== matched.length) hasError = 2
+    if (toMatch.length !== matched.length) exitCode = 2
   }
 
-  return process.exit(hasError)
+  disableObjectKeysOnToString()
+  return process.exit(exitCode)
 })
 
-var DELIMITERS = '{ }'
+
+/**
+ *
+ *   Helpers
+ *
+ */
+
+const delimiters = '{ }'
 
 function renderText(pkgs, options) {
-  return pkgs.map(function(pkg) {
-    pkg = Object.create(pkg)
-    return template.compile(options.format, {delimiters: DELIMITERS}).render(pkg)
-  }).join('\n')
+  return pkgs
+  .map(pkg => template.compile(options.format, {delimiters}).render(pkg))
+  .join('\n')
 }
 
 function filterByFormat(pkgs, format) {
-  var vars = getVars(pkgs, format)
-  return pkgs.filter(function(pkg) {
-    return vars.every(function(v) {
-      return v.value.render(pkg) !== ''
-    }, {})
-    return obj
-  })
+  let vars = getVars(pkgs, format)
+  // filter out packages which don't have results for *all* format vars
+  return pkgs.filter(pkg => vars.every(v => v.value.render(pkg) !== ''))
 }
 
+
 function formatObject(pkgs, format) {
-  var vars = getVars(pkgs, format)
-  return pkgs.map(function(pkg) {
-    return vars.reduce(function(obj, v) {
-      obj[v.key] = he.decode(v.value.render(pkg))
-      return obj
-    }, {})
+  let vars = getVars(pkgs, format)
+  var obj = pkgs.map(pkg => vars.reduce((obj, v) => {
+    obj[v.key] = he.decode(v.value.render(pkg))
     return obj
-  })
+  }, {}))
+  return obj
 }
 
 function getVars(pkgs, format) {
-  var VARIABLE_TAG = '_v'
-  var templateOpts = {delimiters: DELIMITERS}
-  var tree = template.parse(template.scan(format, templateOpts.delimiters))
-  var names = tree.filter(function(item) {
-    return item.tag === VARIABLE_TAG
-  }).reduce(function(names, item, index, arr) {
-    var prev = names[names.length - 1]
+  let VARIABLE_TAG = '_v'
+  let templateOpts = {delimiters}
+  let tree = template.parse(template.scan(format, templateOpts.delimiters))
+
+  let names = tree
+  .filter(item => item.tag === VARIABLE_TAG)
+  .reduce((names, item, index, arr) => {
+    let prev = names[names.length - 1]
     if (!prev) item.i = getLength(item)
     else item.i = prev.i + getLength(item)
     names.push(item)
     return names
   }, [])
-  return names.map(function(item) {
+
+  return names.map(item => {
     return {
       key: item.n,
       value: template.generate([item], '', templateOpts)
@@ -230,58 +237,54 @@ function getVars(pkgs, format) {
   })
 }
 
+const ObjectToString = Object.prototype.toString
+
+function isPlainObj(o) {
+  return typeof o == 'object' && o.constructor == Object;
+}
+
+function enableObjectKeysOnToString() {
+  Object.prototype.toString = function InstalledObjectToString(...args) {
+    if (!isPlainObj(this)) return ObjectToString.apply(this, ...args)
+    return `${Object.getOwnPropertyNames(this).join(',')}`
+  }
+}
+
+function disableObjectKeysOnToString() {
+  Object.prototype.toString = ObjectToString
+}
+
+
+
+function possibleFormatKeys(dirname, options) {
+  matchInstalled.readInstalled(dirname, options, (err, installed) => {
+    if (err) throw err
+    installed.dependencies = installed._dependencies
+    delete installed._dependencies
+    log(columnify(split(flat(installed)), options.columns))
+    process.exit(0)
+  })
+}
+
 function renderTable(pkgs, options) {
-  return columnify(formatObject(pkgs, options.format))
+  return columnify(formatObject(pkgs, options.format), options.columns)
 }
 
 function getLength(item) {
   return item.n.length + item.otag.length + item.ctag.length
 }
 
-function logError() {
+function logStdErr(...args) {
   if (argv['silent']) return
-  console.error.apply(console, arguments)
+  console.error(...args)
 }
 
-function log() {
+function log(...args) {
   if (argv['silent']) return
-  console.log.apply(console, arguments)
+  console.log(...args)
 }
 
-function summary() {
+function summary(...args) {
   if (!argv['summary']) return
-  logError.apply(null, arguments)
+  logStdErr(...args)
 }
-
-function getNameAtVersionPath(pkg) {
-  return pkg.name + '@' + pkg.version + ' ' + pkg.realPath
-}
-
-function getNameAtVersion(pkg) {
-  return pkg.name + '@' + pkg.version
-}
-
-function getName(pkg) {
-  return pkg.name
-}
-
-function inspect(item) { // for debugging
-  console.log(require('util').inspect(item, {colors: true, depth: 30}))
-}
-
-function possibleFormatKeys(dirname, options) {
-  matchInstalled.readInstalled(dirname, options, function(err, installed) {
-    if (err) throw err
-    installed.dependencies = installed._dependencies
-    delete installed._dependencies
-    log(columnify(split(flat(installed)), {
-      truncate: true,
-      config: {
-        key: {maxWidth: 50},
-        value: {maxWidth: 50}
-      }
-    }))
-    process.exit(0)
-  })
-}
-
