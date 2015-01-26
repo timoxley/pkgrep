@@ -139,8 +139,8 @@ tape@3.4.0
 
 `pkgrep` permits using arbitrary ES6 expressions. Use at own risk.
 
-All package properties are in scope as if the code was executed within a
-`with` statement. No return statement is required for single-line
+All package keys are in scope, as if the code was executed within a
+`with` statement for each package. No return statement is required for single-line
 expressions.
 
 For example, we can list only dependencies that depend on `tap` in their
