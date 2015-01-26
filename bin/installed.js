@@ -7,7 +7,7 @@ var _toArray = function (arr) {
   return Array.isArray(arr) ? arr : Array.from(arr);
 };
 
-var cli = require("yargs").usage("Display data about installed packages.\n\nUsage: $0 [options] [name[@version] ...]").boolean("dev").describe("dev", "Include development dependencies.").boolean("extraneous")["default"]("extraneous", true).describe("extraneous", "Show extraneous dependencies").describe("no-extraneous", "Filter extraneous dependencies. This will include --dev dependencies if --dev is not enabled.").boolean("summary")["default"]("summary", true).describe("summary", "Show summary after results on stderr.").describe("no-summary", "Do not print any summary text to stderr. \"e.g. 5 matching dependencies.\"").describe("depth", "Traversal depth. use --depth=Infinity or --depth=-1 to traverse entire dependency tree.")["default"]("depth", 0).alias("d", "depth").boolean("all").alias("a", "all").describe("all", "Match all dependencies. non-zero exit if not all match.").alias("s", "silent").describe("silent", "No visual output, exit codes only.").string("format").describe("format", "Output format string. Place variables in {curlies}.")["default"]("format", "{name}@{version}").boolean("list-vars").describe("list-vars", "List examples of possible --format & --table variables.").boolean("table").describe("table", "Show output in a table. Use --format to indicate desired columns. All non-variables are ignored.").boolean("unique")["default"]("unique", true).describe("unique", "Only display unique lines of output.").describe("no-unique", "Permit duplicate lines of output.").string("filter").describe("filter", "Filter packages by an expression. See http://npm.im/to-function for syntax.").boolean("strict").describe("strict", "Only list packages which contain all variables in --format.").boolean("json").describe("json", "Generate JSON output. Respects keys used in --format. All non-variables are ignored.").boolean("flatten").describe("flatten", "Flatten --json output so there is no object nesting.").example("$0", "List all top-level dependencies")
+var cli = require("yargs").boolean("a").alias("a", "all").describe("a", "Match all dependencies. non-zero exit if not all match.")["default"]("d", 0).describe("d", "Traversal depth. use --depth=Infinity or --depth=-1 to traverse entire dependency tree.").alias("d", "depth").usage("Display data about installed packages.\n\nUsage: $0 [options] [name[@version] ...]").string("f").describe("f", "Output format string. Place variables in {curlies}.")["default"]("f", "{name}@{version}").boolean("t").describe("t", "Show output in a table. Use --format to indicate desired columns. All non-variables are ignored.").alias("t", "table").boolean("s").describe("s", "Only list packages which contain all variables in --format.").alias("s", "strict").alias("f", "format").alias("x", "filter").string("x").describe("x", "Filter packages using an ES6 expression.").boolean("dev").describe("dev", "Include development dependencies.").boolean("extraneous")["default"]("extraneous", true).describe("extraneous", "Show extraneous dependencies").describe("no-extraneous", "Filter extraneous dependencies. This will include --dev dependencies if --dev is not enabled.").boolean("flatten").describe("flatten", "Flatten --json output so there is no object nesting.").boolean("json").describe("json", "Generate JSON output. Respects keys used in --format. All non-variables are ignored.").boolean("list-vars").describe("list-vars", "List examples of possible --format & --table variables.").boolean("summary")["default"]("summary", true).describe("summary", "Show summary after results on stderr.").describe("no-summary", "Do not print any summary text to stderr. \"e.g. 5 matching dependencies.\"").describe("silent", "No visual output, exit codes only.").boolean("unique")["default"]("unique", true).describe("unique", "Only display unique lines of output.").describe("no-unique", "Do not remove duplicate lines of output.").example("$0", "List all top-level dependencies")
 //.example('$0 mkdirp', 'Check whether any version of mkdirp is installed at the top level.')
 .example("$0 inherits mkdirp", "Check whether either mkdirp or inherits are installed. Only fails if none can be found.").example("$0 --all inherits mkdirp", "Check whether both mkdirp and inherits are installed. Fails all dependencies are found.")
 //.example('$0 --depth=-1', 'List all dependencies at any depth.')
@@ -18,7 +18,7 @@ var cli = require("yargs").usage("Display data about installed packages.\n\nUsag
 .example("$0 mkdirp@^1.0.0", "Check whether mkdirp version matching ^1.0.0 is installed.")
 //.example('$0 --no-extraneous', 'List all packages, ignoring extraneous dependencies.')
 //.example('$0 --table', 'Format top level dependencies name & version as a table.')
-.example("$0 --format=\"{name}\" mkdirp inherits", "Only print names of matching installed dependencies at the top level.").example("$0 --format=\"{version} - {realPath}\" mkdirp", "Print the version followed by a hyphen and the realpath to mkdirp.").example("$0 --table --format=\"{name} {license} {path}\"", "Format top level dependency name, license and path as a table.").example("$0 --depth=-1 --unique --format=\"{name}@{version}\"", "List all dependencies, but only display unique name@version instances.").example("$0 --filter=\"scripts.test\"", "List only dependencies with a test script.").example("$0 --filter=\"dependencies.browserify\"", "List only dependencies that depend on browserify.").example("$0 --filter=\"browserify.transform.includes('es6ify') == -1\"", "List only dependencies with es6ify as a browserify transform (Note: ES6 prototype features are shimmed).").example("$0 --filter=\"dependencies.browserify\" --dev", "List only dependencies that depend on browserify.").help("help").version(require("../package.json").version, "version");
+.example("$0 --format=\"{name}\" mkdirp inherits", "Only print names of matching installed dependencies at the top level.").example("$0 --format=\"{version} - {realPath}\" mkdirp", "Print the version followed by a hyphen and the realpath to mkdirp.").example("$0 --table --format=\"{name} {license} {path}\"", "Format top level dependency name, license and path as a table.").example("$0 --depth=-1 --unique --format=\"{name}@{version}\"", "List all dependencies, but only display unique name@version instances.").example("$0 --filter=\"scripts.test\"", "List only dependencies with a test script.").example("$0 --filter=\"dependencies.browserify\"", "List only dependencies that depend on browserify.").example("$0 --filter=\"browserify.transform.includes('es6ify')\"", "List only dependencies with es6ify as a browserify transform (Note: ES6 prototype features are shimmed).").example("$0 --filter=\"dependencies.browserify\" --dev", "List only dependencies that depend on browserify.").help("help").version(require("../package.json").version, "version");
 
 var argv = cli.argv;
 
@@ -27,13 +27,12 @@ var template = require("hogan");
 var columnify = require("columnify");
 var split = require("split-object");
 var flat = require("flat");
-var toFunction = require("to-function");
-var stringToRegexp = require("string-to-regexp");
 var stringify = require("json-stringify-safe");
 var he = require("he");
+var addWith = require("with");
 
-// mainly included for --filter purposees
-require("core-js/shim");
+var vm = require("vm");
+var to5 = require("6to5");
 
 var dirname = process.cwd();
 var toMatch = argv._;
@@ -66,20 +65,16 @@ matchInstalled(dirname, toMatch, argv, function (err, pkgs, matched) {
     pkgs = filterByFormat(pkgs, argv.format);
   }
   if (argv.filter) {
-    (function () {
-      if (argv.filter[0] === "/") {
-        argv.filter = stringToRegexp(argv.filter);
-      }
-
-      var filter = toFunction(argv.filter);
-      pkgs = pkgs.filter(function (pkg) {
-        try {
-          return filter(pkg);
-        } catch (e) {
-          return false;
-        }
-      });
-    })();
+    try {
+      var filterFn = to5.transform("\n      // whitespace is to reduce noise if there's an error.\n      let fn\n\n\n      =()=> " + argv.filter + "\n\n\n\n      return fn(pkg, index, pkgs)\n    ").code;
+    } catch (e) {
+      throw new Error("Error in --filter: \n " + e.message);
+    }
+    filterFn = addWith("pkg", filterFn);
+    var code = to5.transform("\n      require('6to5/register')\n      require('6to5/polyfill')\n      o.pkgs = o.pkgs.filter((pkg, index, pkgs) => {\n        try {\n          " + filterFn + "\n        } catch (e) {\n          // Ignore type errors e.g. ignore failed a.b.c chains.\n          if (e instanceof TypeError) return false\n          throw e\n        }\n      })\n    ");
+    var results = { pkgs: pkgs };
+    vm.runInNewContext(code.code, { o: results, require: require, console: console });
+    pkgs = results.pkgs;
   }
 
   var resultTotal = pkgs.length;
@@ -208,7 +203,7 @@ function getVars(pkgs, format) {
 var ObjectToString = Object.prototype.toString;
 
 function isPlainObj(o) {
-  return typeof o == "object" && o.constructor == Object;
+  return o && typeof o === "object" && o.constructor == Object;
 }
 
 function enableObjectKeysOnToString() {

@@ -74,13 +74,12 @@ const template = require('hogan')
 const columnify = require('columnify')
 const split = require('split-object')
 const flat = require('flat')
-const toFunction = require('to-function')
-const stringToRegexp = require('string-to-regexp')
 const stringify = require('json-stringify-safe')
 const he = require('he')
+const addWith = require('with')
 
-// mainly included for --filter purposees
-require("core-js/shim");
+const vm = require('vm');
+const to5 = require('6to5')
 
 const dirname = process.cwd()
 const toMatch = argv._
@@ -113,18 +112,38 @@ matchInstalled(dirname, toMatch, argv, function(err, pkgs, matched) {
     pkgs = filterByFormat(pkgs, argv['format'])
   }
   if (argv['filter']) {
-    if (argv['filter'][0] === '/') {
-      argv['filter'] = stringToRegexp(argv['filter'])
-    }
+    try {
+    var filterFn = to5.transform(`
+      // whitespace is to reduce noise if there's an error.
+      let fn
 
-    let filter = toFunction(argv['filter'])
-    pkgs = pkgs.filter(pkg => {
-      try {
-        return filter(pkg)
-      } catch (e) {
-        return false
-      }
-    })
+
+      =()=> ${argv.filter}
+
+
+
+      return fn(pkg, index, pkgs)
+    `).code
+    } catch(e) {
+      throw new Error(`Error in --filter: \n ${e.message}`)
+    }
+    filterFn = addWith('pkg', filterFn)
+    let code = to5.transform(`
+      require('6to5/register')
+      require('6to5/polyfill')
+      o.pkgs = o.pkgs.filter((pkg, index, pkgs) => {
+        try {
+          ${filterFn}
+        } catch (e) {
+          // Ignore type errors e.g. ignore failed a.b.c chains.
+          if (e instanceof TypeError) return false
+          throw e
+        }
+      })
+    `)
+    var results = {pkgs}
+    vm.runInNewContext(code.code, {o: results, require, console: console})
+    pkgs = results.pkgs
   }
 
   let resultTotal = pkgs.length
@@ -245,7 +264,7 @@ function getVars(pkgs, format) {
 const ObjectToString = Object.prototype.toString
 
 function isPlainObj(o) {
-  return typeof o == 'object' && o.constructor == Object;
+  return o && typeof o === 'object' && o.constructor == Object;
 }
 
 function enableObjectKeysOnToString() {
