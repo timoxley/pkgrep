@@ -17,6 +17,7 @@ test: build
 	$(RUN) --format="{name} {dependencies.slide}" --strict --json -d=1
 	$(RUN) --format="{name} {dependencies.slide}" --strict -d=1
 	$(RUN) --format="{name} {dependencies.slide}" --table --strict -d=1
+	$(RUN) --format="{name}" --filter="keywords.includes('parser')" --table --strict -d=1
 	$(RUN) --format="" --table --strict
 	$(RUN) --format="should be one line"
 	$(RUN) --format="should be multiple lines" --no-unique

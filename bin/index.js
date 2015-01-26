@@ -59,7 +59,7 @@ const cli = require('yargs')
 .example('$0 --depth=-1 --unique --format="{name}@{version}"', 'List all dependencies, but only display unique name@version instances.')
 .example('$0 --filter="scripts.test"', 'List only dependencies with a test script.')
 .example('$0 --filter="dependencies.browserify"', 'List only dependencies that depend on browserify.')
-.example('$0 --filter="browserify.transform.indexOf(\'es6ify\') == -1"', 'List only dependencies with es6ify as a browserify transform.')
+.example('$0 --filter="browserify.transform.includes(\'es6ify\') == -1"', 'List only dependencies with es6ify as a browserify transform (Note: ES6 prototype features are shimmed).')
 .example('$0 --filter="dependencies.browserify" --dev', 'List only dependencies that depend on browserify.')
 .help('help')
 .version(require('../package.json').version, 'version')
@@ -67,7 +67,6 @@ const cli = require('yargs')
 const argv = cli.argv
 
 const matchInstalled = require('../')
-
 const template = require('hogan')
 const columnify = require('columnify')
 const split = require('split-object')
@@ -76,6 +75,9 @@ const toFunction = require('to-function')
 const stringToRegexp = require('string-to-regexp')
 const stringify = require('json-stringify-safe')
 const he = require('he')
+
+// mainly included for --filter purposees
+require("core-js/shim");
 
 const dirname = process.cwd()
 const toMatch = argv._

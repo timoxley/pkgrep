@@ -18,12 +18,11 @@ var cli = require("yargs").usage("Display data about installed packages.\n\nUsag
 .example("$0 mkdirp@^1.0.0", "Check whether mkdirp version matching ^1.0.0 is installed.")
 //.example('$0 --no-extraneous', 'List all packages, ignoring extraneous dependencies.')
 //.example('$0 --table', 'Format top level dependencies name & version as a table.')
-.example("$0 --format=\"{name}\" mkdirp inherits", "Only print names of matching installed dependencies at the top level.").example("$0 --format=\"{version} - {realPath}\" mkdirp", "Print the version followed by a hyphen and the realpath to mkdirp.").example("$0 --table --format=\"{name} {license} {path}\"", "Format top level dependency name, license and path as a table.").example("$0 --depth=-1 --unique --format=\"{name}@{version}\"", "List all dependencies, but only display unique name@version instances.").example("$0 --filter=\"scripts.test\"", "List only dependencies with a test script.").example("$0 --filter=\"dependencies.browserify\"", "List only dependencies that depend on browserify.").example("$0 --filter=\"browserify.transform.indexOf('es6ify') == -1\"", "List only dependencies with es6ify as a browserify transform.").example("$0 --filter=\"dependencies.browserify\" --dev", "List only dependencies that depend on browserify.").help("help").version(require("../package.json").version, "version");
+.example("$0 --format=\"{name}\" mkdirp inherits", "Only print names of matching installed dependencies at the top level.").example("$0 --format=\"{version} - {realPath}\" mkdirp", "Print the version followed by a hyphen and the realpath to mkdirp.").example("$0 --table --format=\"{name} {license} {path}\"", "Format top level dependency name, license and path as a table.").example("$0 --depth=-1 --unique --format=\"{name}@{version}\"", "List all dependencies, but only display unique name@version instances.").example("$0 --filter=\"scripts.test\"", "List only dependencies with a test script.").example("$0 --filter=\"dependencies.browserify\"", "List only dependencies that depend on browserify.").example("$0 --filter=\"browserify.transform.includes('es6ify') == -1\"", "List only dependencies with es6ify as a browserify transform (Note: ES6 prototype features are shimmed).").example("$0 --filter=\"dependencies.browserify\" --dev", "List only dependencies that depend on browserify.").help("help").version(require("../package.json").version, "version");
 
 var argv = cli.argv;
 
 var matchInstalled = require("../");
-
 var template = require("hogan");
 var columnify = require("columnify");
 var split = require("split-object");
@@ -32,6 +31,9 @@ var toFunction = require("to-function");
 var stringToRegexp = require("string-to-regexp");
 var stringify = require("json-stringify-safe");
 var he = require("he");
+
+// mainly included for --filter purposees
+require("core-js/shim");
 
 var dirname = process.cwd();
 var toMatch = argv._;
