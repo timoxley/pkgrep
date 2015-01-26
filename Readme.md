@@ -15,22 +15,7 @@ Find, filter & format package data in node_modules.
 
 Usage: pkgrep [options] [name[@version] ...]
 
-Examples:
-  pkgrep                                                       List all top-level dependencies
-  pkgrep inherits mkdirp                                       Check whether either mkdirp or inherits are installed. Only fails if none can be found.
-  pkgrep --all inherits mkdirp                                 Check whether both mkdirp and inherits are installed. Fails all dependencies are found.
-  pkgrep --depth=-1 mkdirp                                     Check whether mkdirp is installed at any depth.
-  pkgrep --dev mkdirp                                          Check for mkdirp as a dependency OR a devDependency. devDependencies are filtered-out by default.
-  pkgrep mkdirp@^1.0.0                                         Check whether mkdirp version matching ^1.0.0 is installed.
-  pkgrep --format="{name}" mkdirp inherits                     Only print names of matching installed dependencies at the top level.
-  pkgrep --format="{version} - {realPath}" mkdirp              Print the version followed by a hyphen and the realpath to mkdirp.
-  pkgrep --table --format="{name} {license} {path}"            Format top level dependency name, license and path as a table.
-  pkgrep --depth=-1 --unique --format="{name}@{version}"       List all dependencies, but only display unique name@version instances.
-  pkgrep --filter="scripts.test"                               List only dependencies with a test script.
-  pkgrep --filter="dependencies.browserify"                    List only dependencies that depend on browserify.
-  pkgrep --filter="browserify.transform.includes('es6ify')"    List only dependencies with es6ify as a browserify transform (Note: ES6 prototype features are shimmed).
-  pkgrep --filter="dependencies.browserify" --dev              List only dependencies that depend on browserify.
-
+...
 
 Options:
   -a, --all        Match all dependencies. non-zero exit if not all match.
@@ -56,12 +41,16 @@ Options:
 
 ## Examples
 
-### List all top-level dependencies
-
+To follow along at home, start with this:
 ```
 > mkdir pkgrep-cli-test && cd pkgrep-cli-test
 > npm init -f
 > npm install inherits mkdirp --save
+```
+
+### List all top-level dependencies
+
+```
 > pkgrep
 inherits@2.0.1
 mkdirp@0.5.0
@@ -73,7 +62,6 @@ mkdirp@0.5.0
 You can use `--depth` in combination with most other flags.
 
 ```
-> npm install --save mkdirp
 > pkgrep --depth=-1
 inherits@2.0.1
 mkdirp@0.5.0
@@ -81,7 +69,8 @@ minimist@0.0.8
 3 matching dependencies
 ```
 
-### Check Whether a Package is Installed
+### Check whether a package is installed
+
 
 If the package is not installed you'll get a non-zero exit-code:
 
@@ -95,6 +84,8 @@ No matching dependencies!
 package is not installed
 ```
 
+#### Matching Semver
+
 You can pass any valid semver version in the format: name@semver:
 ```
 > pkgrep inherits@2.0.0
@@ -107,8 +98,10 @@ inherits@2.0.1
 
 ### Check whether multiple packages are installed
 
+Only matched packages will be printed. Only non-zero exit code if no packages.
+
 ```
-> pkgrep mkdirp inherits bower || echo "Failed."
+> pkgrep mkdirp inherits bower
 inherits@2.0.1
 mkdirp@0.5.0
 2 matching dependencies.
@@ -117,17 +110,6 @@ mkdirp@0.5.0
 ### Ensure Packages are Installed
 
 `--all` will exit with failure unless all listed packages are matched.
-
-```
-> pkgrep --all mkdirp inherits bower || echo "Failed."
-inherits@2.0.1
-mkdirp@0.5.0
-2 matching dependencies.
-2 out of 3 matches.
-Failed.
-```
-
-`--all` will exit with failure unless all packages are matched.
 
 ```
 > pkgrep --all mkdirp inherits bower || echo "Failed."
@@ -153,10 +135,29 @@ tape@3.4.0
 1 matching dependency
 ```
 
-### Custom Output Data and Formats
+### Filtering packages
+
+`pkgrep` permits using arbitrary ES6 expressions. Use at own risk.
+
+All package properties are in scope as if the code was executed within a
+`with` statement. No return statement is required for single-line
+expressions.
+
+For example, we can list only dependencies that depend on `tap` in their
+devDependencies:
+
+```
+> pkgrep --filter="devDependencies.tap" --depth=-1
+NAME     VERSION REALPATH
+inherits 2.0.1   /Users/timoxley/Projects/get-dependencies/pkgrep-cli-test/node_modules/inherits
+mkdirp   0.5.0   /Users/timoxley/Projects/get-dependencies/pkgrep-cli-test/node_modules/mkdirp
+2 dependencies.
+```
+
+### Custom output data format
 
 Use `--format` to control output. Variables are enclosed in single
-curlies.
+{curlies}.
 
 ```
 > pkgrep --format="{name}"
@@ -169,7 +170,7 @@ mkdirp@0.5.0 - /Users/timoxley/Projects/test/pkgrep-cli-test/node_modules/mkdirp
 2 dependencies.
 ```
 
-### Print Nested Properties
+### Print nested properties
 
 ```
 > pkgrep --format='{name} "{scripts.test}"'
@@ -178,7 +179,7 @@ mkdirp "tap test/*.js"
 2 dependencies.
 ```
 
-### List Available Format Variables
+### List available format variables
 
 ```
 > pkgrep --list-vars
@@ -208,7 +209,7 @@ peerDependencies      [object Object]
 root                  true
 ```
 
-### Table Output
+### Table output
 
 Formatting courtesy of [columnify](https://github.com/timoxley/columnify).
 
@@ -233,7 +234,7 @@ through        2.3.6
 ```
 
 
-### Control Table Columns
+### Control table columns
 
 To make it easy to flip between text and table output, all whitespace &
 non-variable characters in the `--format` string are totally ignored.
@@ -247,7 +248,7 @@ mkdirp   0.5.0   /Users/timoxley/Projects/get-dependencies/pkgrep-cli-test/node_
 2 dependencies.
 ```
 
-### JSON Output
+### JSON output
 
 Use `--json` to get JSON Output.
 
@@ -270,7 +271,7 @@ Use `--json` to get JSON Output.
 2 dependencies.
 ```
 
-### Flatten JSON Output
+### Flatten JSON output
 
 Use `--flatten` with `--json` to remove JSON object nesting.
 
@@ -286,25 +287,6 @@ Use `--flatten` with `--json` to remove JSON object nesting.
     "scripts.test": "tap test/*.js"
   }
 ]
-2 dependencies.
-```
-
-### Filtering Packages
-
-`pkgrep` permits using arbitrary ES6 expressions. Use at own risk.
-
-All package properties are in scope as if the code was executed within a
-`with` statement. No return statement is required for single-line
-expressions.
-
-For example, we can list only dependencies that depend on `tap` in their
-devDependencies:
-
-```
-> pkgrep --filter="devDependencies.tap" --depth=-1
-NAME     VERSION REALPATH
-inherits 2.0.1   /Users/timoxley/Projects/get-dependencies/pkgrep-cli-test/node_modules/inherits
-mkdirp   0.5.0   /Users/timoxley/Projects/get-dependencies/pkgrep-cli-test/node_modules/mkdirp
 2 dependencies.
 ```
 
