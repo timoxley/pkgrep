@@ -13,16 +13,16 @@ const cli = require('yargs')
 .string('f')
 .describe('f', 'Output format string. Place variables in {curlies}.')
 .default('f', '{name}@{version}')
+.alias('f', 'format')
 .boolean('t')
 .describe('t', 'Show output in a table. Use --format to indicate desired columns. All non-variables are ignored.')
 .alias('t', 'table')
 .boolean('s')
 .describe('s', 'Only list packages which contain all variables in --format.')
 .alias('s', 'strict')
-.alias('f', 'format')
-.alias('x', 'filter')
 .string('x')
 .describe('x', 'Filter packages using an arbitrary ES6 expression. No return statement required. Use at own risk.')
+.alias('x', 'filter')
 .boolean('dev')
 .describe('dev', 'Include development dependencies.')
 .boolean('extraneous')
@@ -86,22 +86,22 @@ const toMatch = argv._
 
 let exitCode = 0
 
+argv.columns = {
+  truncate: true,
+  maxLineWidth: 'auto'
+}
+
 // Note I've used the square bracket syntax for all argv accesses so
 // that it's easier to see where the args are used.
 
 if (argv['depth'] === 'Infinity') argv['depth'] = Infinity
 if (argv['depth'] === -1) argv['depth'] = Infinity
-
 if (argv['list-vars']) {
   logStdErr('Possible format keys:')
-  possibleFormatKeys(dirname)
+  possibleFormatKeys(dirname, argv)
   return
 }
 
-argv.columns = {
-  truncate: true,
-  maxLineWidth: 'auto'
-}
 
 matchInstalled(dirname, toMatch, argv, function(err, pkgs, matched) {
   if (err) throw err
@@ -278,14 +278,15 @@ function disableObjectKeysOnToString() {
   Object.prototype.toString = ObjectToString
 }
 
-
-
 function possibleFormatKeys(dirname, options) {
-  matchInstalled.readInstalled(dirname, options, (err, installed) => {
+  matchInstalled(dirname, [], options, (err, installed) => {
     if (err) throw err
-    installed.dependencies = installed._dependencies
-    delete installed._dependencies
-    log(columnify(split(flat(installed)), options.columns))
+    let data = JSON.parse(stringify(installed[0].parent))
+    data.dependencies = {}
+    data.devDependencies = {}
+    data.parent = {}
+    data.readme = data.readme.slice(0, 30) + '...'
+    log(columnify(split(flat(data)), options.columns))
     process.exit(0)
   })
 }
