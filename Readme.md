@@ -295,6 +295,13 @@ Use `--flatten` with `--json` to remove JSON object nesting.
 * Gather more usecases.
 * Integration tests.
 
+## See Also
+
+* [timoxley/pkgfiles](https://github.com/timoxley/pkgfiles)
+* [timoxley/pkgrep](https://github.com/timoxley/pkgrep)
+* [timoxley/pkgcount](https://github.com/timoxley/pkgcount)
+* [timoxley/installed](https://github.com/timoxley/installed)
+
 ## License
 
 MIT
