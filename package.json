@@ -48,10 +48,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/timoxley/installed.git"
+    "url": "https://github.com/timoxley/pkgrep.git"
   },
   "bugs": {
-    "url": "https://github.com/timoxley/installed/issues"
+    "url": "https://github.com/timoxley/pkgrep/issues"
   },
-  "homepage": "https://github.com/timoxley/installed"
+  "homepage": "https://github.com/timoxley/pkgrep"
 }
