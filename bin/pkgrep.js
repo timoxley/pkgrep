@@ -20,7 +20,6 @@ var cli = require("yargs").usage("Find, filter & format package data in node_mod
 
 var argv = cli.argv;
 
-
 var matchInstalled = require("../");
 var template = require("hogan");
 var columnify = require("columnify");
