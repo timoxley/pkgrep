@@ -81,6 +81,9 @@ const addWith = require('with')
 const vm = require('vm');
 const to5 = require('6to5')
 
+// Warning: mutates global prototypes.
+require('6to5/polyfill')
+
 const dirname = process.cwd()
 const toMatch = argv._
 
@@ -129,17 +132,18 @@ matchInstalled(dirname, toMatch, argv, function(err, pkgs, matched) {
     }
     filterFn = addWith('pkg', filterFn)
     let code = to5.transform(`
-      require('6to5/register')
-      require('6to5/polyfill')
-      o.pkgs = o.pkgs.filter((pkg, index, pkgs) => {
-        try {
-          ${filterFn}
-        } catch (e) {
-          // Ignore type errors e.g. ignore failed a.b.c chains.
-          if (e instanceof TypeError) return false
-          throw e
-        }
-      })
+      require('6to5/register')()
+      ;(function() {
+        o.pkgs = o.pkgs.filter((pkg, index, pkgs) => {
+          try {
+            ${filterFn}
+          } catch (e) {
+            // Ignore type errors e.g. ignore failed a.b.c chains.
+            if (e instanceof TypeError) return false
+            throw e
+          }
+        })
+      })()
     `)
     var results = {pkgs}
     vm.runInNewContext(code.code, {o: results, require, console: console})
