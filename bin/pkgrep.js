@@ -3,9 +3,7 @@
 
 "use strict";
 
-var _toArray = function (arr) {
-  return Array.isArray(arr) ? arr : Array.from(arr);
-};
+var _toArray = function (arr) { return Array.isArray(arr) ? arr : Array.from(arr); };
 
 var cli = require("yargs").usage("Find, filter & format package data in node_modules.\n\nUsage: $0 [options] [name[@version] ...]").boolean("a").alias("a", "all").describe("a", "Match all dependencies. non-zero exit if not all match.")["default"]("d", 0).describe("d", "Traversal depth. use --depth=Infinity or --depth=-1 to traverse entire dependency tree.").alias("d", "depth").string("f").describe("f", "Output format string. Place variables in {curlies}.")["default"]("f", "{name}@{version}").alias("f", "format").boolean("t").describe("t", "Show output in a table. Use --format to indicate desired columns. All non-variables are ignored.").alias("t", "table").boolean("s").describe("s", "Only list packages which contain all variables in --format.").alias("s", "strict").string("x").describe("x", "Filter packages using an arbitrary ES6 expression. No return statement required. Use at own risk.").alias("x", "filter").boolean("dev").describe("dev", "Include development dependencies.").boolean("extraneous")["default"]("extraneous", true).describe("extraneous", "Show extraneous dependencies").describe("no-extraneous", "Filter extraneous dependencies. This will include --dev dependencies if --dev is not enabled.").boolean("flatten").describe("flatten", "Flatten --json output so there is no object nesting.").boolean("json").describe("json", "Generate JSON output. Respects keys used in --format. All non-variables are ignored.").boolean("list-vars").describe("list-vars", "List examples of possible --format & --table variables.").boolean("summary")["default"]("summary", true).describe("summary", "Show summary after results on stderr.").describe("no-summary", "Do not print any summary text to stderr. \"e.g. 5 matching dependencies.\"").describe("silent", "No visual output, exit codes only.").boolean("unique")["default"]("unique", true).describe("unique", "Only display unique lines of output.").describe("no-unique", "Do not remove duplicate lines of output.").example("$0", "List all top-level dependencies")
 //.example('$0 mkdirp', 'Check whether any version of mkdirp is installed at the top level.')
@@ -22,6 +20,7 @@ var cli = require("yargs").usage("Find, filter & format package data in node_mod
 
 var argv = cli.argv;
 
+
 var matchInstalled = require("../");
 var template = require("hogan");
 var columnify = require("columnify");
@@ -33,6 +32,9 @@ var addWith = require("with");
 
 var vm = require("vm");
 var to5 = require("6to5");
+
+// Warning: mutates global prototypes.
+require("6to5/polyfill");
 
 var dirname = process.cwd();
 var toMatch = argv._;
@@ -71,7 +73,7 @@ matchInstalled(dirname, toMatch, argv, function (err, pkgs, matched) {
       throw new Error("Error in --filter: \n " + e.message);
     }
     filterFn = addWith("pkg", filterFn);
-    var code = to5.transform("\n      require('6to5/register')\n      require('6to5/polyfill')\n      o.pkgs = o.pkgs.filter((pkg, index, pkgs) => {\n        try {\n          " + filterFn + "\n        } catch (e) {\n          // Ignore type errors e.g. ignore failed a.b.c chains.\n          if (e instanceof TypeError) return false\n          throw e\n        }\n      })\n    ");
+    var code = to5.transform("\n      require('6to5/register')()\n      ;(function() {\n        o.pkgs = o.pkgs.filter((pkg, index, pkgs) => {\n          try {\n            " + filterFn + "\n          } catch (e) {\n            // Ignore type errors e.g. ignore failed a.b.c chains.\n            if (e instanceof TypeError) return false\n            throw e\n          }\n        })\n      })()\n    ");
     var results = { pkgs: pkgs };
     vm.runInNewContext(code.code, { o: results, require: require, console: console });
     pkgs = results.pkgs;
@@ -243,8 +245,8 @@ function getLength(item) {
 }
 
 function logStdErr() {
-  for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-    args[_key2] = arguments[_key2];
+  for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+    args[_key] = arguments[_key];
   }
 
   if (argv.silent) return;
@@ -252,8 +254,8 @@ function logStdErr() {
 }
 
 function log() {
-  for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-    args[_key3] = arguments[_key3];
+  for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+    args[_key] = arguments[_key];
   }
 
   if (argv.silent) return;
@@ -261,8 +263,8 @@ function log() {
 }
 
 function summary() {
-  for (var _len4 = arguments.length, args = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
-    args[_key4] = arguments[_key4];
+  for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+    args[_key] = arguments[_key];
   }
 
   if (!argv.summary) return;
