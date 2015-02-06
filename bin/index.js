@@ -132,7 +132,7 @@ matchInstalled(dirname, toMatch, argv, function(err, pkgs, matched) {
     }
     filterFn = addWith('pkg', filterFn)
     let code = to5.transform(`
-      require('6to5/register')()
+      require('6to5-core/register')()
       ;(function() {
         o.pkgs = o.pkgs.filter((pkg, index, pkgs) => {
           try {
