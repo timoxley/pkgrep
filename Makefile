@@ -2,8 +2,6 @@ BIN := $(shell node -e "var pkg = require('./package.json'); console.log(pkg.bin
 RUN := node $(BIN)
 
 test: build
-	# remove dev dependencies
-	npm prune --production
 	# sanity check various commands
 	$(RUN)
 	$(RUN) columnify
@@ -24,10 +22,12 @@ test: build
 	$(RUN) --format="should be one line"
 	$(RUN) --format="should be multiple lines" --no-unique
 	$(RUN) --list-vars
-	# restore dev dependencies, please wait
-	npm install --cache-min=Infinity --silent > /dev/null
 
 prepublish: build
+	npm prune --production
+	npm test
+	npm install --cache-min=Infinity --silent --ignore-scripts
+	npm rebuild
 
 build: pkgrep.js bin/pkgrep.js
 
