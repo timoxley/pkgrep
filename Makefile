@@ -2,7 +2,9 @@ BIN := $(PWD)/bin/pkgrep.js
 RUN := node $(BIN)
 
 test: build
-	# just a sanity check for now
+	# remove dev dependencies
+	npm prune --production
+	# sanity check various commands
 	$(RUN)
 	$(RUN) columnify
 	$(RUN) --json
@@ -21,8 +23,9 @@ test: build
 	$(RUN) --format="" --table --strict
 	$(RUN) --format="should be one line"
 	$(RUN) --format="should be multiple lines" --no-unique
-
 	$(RUN) --list-vars
+	# restore dev dependencies, please wait
+	npm install --cache-min=Infinity --silent > /dev/null
 
 prepublish: build
 
