@@ -1,4 +1,4 @@
-BIN := $(PWD)/bin/pkgrep.js
+BIN := $(shell node -e "var pkg = require('./package.json'); console.log(pkg.bin[pkg.name] || pkg.bin)")
 RUN := node $(BIN)
 
 test: build
