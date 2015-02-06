@@ -79,10 +79,10 @@ const he = require('he')
 const addWith = require('with')
 
 const vm = require('vm');
-const to5 = require('6to5')
+const to5 = require('6to5-core')
 
 // Warning: mutates global prototypes.
-require('6to5/polyfill')
+require('6to5-core/polyfill')
 
 const dirname = process.cwd()
 const toMatch = argv._
