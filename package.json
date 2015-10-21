@@ -44,7 +44,7 @@
   },
   "devDependencies": {
     "6to5": "^3.3.12",
-    "tape": "^3.4.0"
+    "tape": "^4.2.2"
   },
   "repository": {
     "type": "git",
