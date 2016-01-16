@@ -40,7 +40,7 @@
     "semver": "^4.2.0",
     "split-object": "^2.0.0",
     "with": "^4.0.0",
-    "yargs": "^3.29.0"
+    "yargs": "^3.32.0"
   },
   "devDependencies": {
     "6to5": "^3.3.12",
